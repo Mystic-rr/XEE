@@ -25,9 +25,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class XXETest {
 
 	Log logger = LogFactory.getLog(XXETest.class);
-	@PostMapping("test")
-	public String test(HttpServletRequest request) throws UnsupportedEncodingException, IOException, DocumentException {
+	@SuppressWarnings("unchecked")
+	@PostMapping("login")
+	public User test(HttpServletRequest request) throws UnsupportedEncodingException, IOException, DocumentException {
 		        String value = "";
+		        User user = new User();
 	            // 获取HTTP请求的输入流
 	            // 已HTTP请求输入流建立一个BufferedReader对象
 	            BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -47,12 +49,17 @@ public class XXETest {
 	//document获取xml文件
 	           document = reader.read(ir);
 	           @SuppressWarnings("unchecked")
-			List<Element> element = document.selectNodes("any");
+			List<Element> element = document.selectNodes("root");
+	        List<Element> usernameList = new ArrayList<>();
+	        String username = "";
 	           for(Element el:element) {
-	        	   logger.info(el.getText());
-	        	   value = el.getText();
+	        	   usernameList = el.selectNodes("username");
 	           }
-	        return value;
+	           for(Element el:usernameList) {
+	        	   username = el.getText();
+	        	   user.setUsername(username);
+	           }
+	        return user;
 	}
 	
 	
